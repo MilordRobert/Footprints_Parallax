@@ -7,8 +7,6 @@ float3 LightDirection;  // Direction from light source to surface
 float3 CameraPosition;
 int Toggle;
 float2 Ratio;
-float Time;
-float3 WindDirection;
 
 sampler DiffuseSampler = sampler_state
 {
@@ -67,8 +65,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR
 {
-	//if(Toggle)
-	//return float4(tex2D(NormalSampler, input.TexC).aaa, 1);
+	if(Toggle)
+	return float4(tex2D(NormalSampler, input.TexC).aaa, 1);
 	const float delta = 0.02;
 const float maxheight = 0;
 const float maxDepth = 2;
@@ -92,34 +90,27 @@ float3 VIn = mul(normalize(input.WorldPosition - CameraPosition), World2Tangent)
 float2 dVInS = VIn.xy / (-VIn.z) * float2(1, -1) * 0.1;
 float3 VIns2 = mul(normalize(input.WorldPosition - CameraPosition), World2Tangent1);
 float2 dVIns2 = VIns2.xy / (-VIns2.z) * float2(1, -1) * 0.1;
-
-float3 erosion = mul(normalize(input.WorldPosition - WindDirection), World2Tangent);
-float2 erosionDirection = erosion.xy / (-erosion.z) * float2(1, -1);
 //return float4(VIn.xxx, 1);
 
 bool above = true;
 bool indent = false;
 float dabove = 0, dbelow = 0;
 float probeabove, probebelow;
-probeabove = maxheight + tex2D(NormalSampler, input.TexC + dVInS * d).a - 0.0;
+probeabove = maxheight + tex2D(NormalSampler, input.TexC + dVInS * d).a - 0.5;
 //return float4(probeabove.xxx, 1);
 //for (d = delta; d <= maxheight + delta + delta / 10; d += delta)
-for (d = delta; d <= maxDepth; d += delta)
+for (; d <= maxDepth; d += delta)
 {
 	if (above)
 	{
-		float neighbour = tex2D(NormalSampler, input.TexC + dVInS * d + Time * erosionDirection * 0.1).a;
-		float probe1 = tex2D(NormalSampler, input.TexC + dVInS * d).a - 0.0;
 
-		float probe = probe1;// (probe1 + neighbour) / 2 < probe1 ? (probe1 + neighbour) / 2 : probe1;
-		//if (probe == (probe1 + neighbour) / 2) indent = true;
-		/*if (indent)
-			probe = (probe + tex2D(NormalSampler, input.TexC + dVInS * d + Time).a) / 2;*/
+		float probe = tex2D(NormalSampler, input.TexC + dVInS * d).a - 0.5;
 		if (/*sample depth is below the surface of height map*/d > probe)
 		{   // Our vector has gone below the surface
 			dbelow = d;
 			probebelow = probe;
 			above = false;
+			
 			
 		}
 		else
@@ -130,37 +121,20 @@ for (d = delta; d <= maxDepth; d += delta)
 	}
 }
 //if(probebelow == 0)
-//return float4(probebelow/4, 0, 0, 1);
+//return float4(1, 0, 0, 1);
 d = (dabove * (probebelow - probeabove) - delta * probeabove) / (probebelow - probeabove - delta);
-//return float4(d.xxx, 1);
+
 //if (Toggle) d = 0;  // Gives Normal map
-float2 tex = input.TexC + dVInS * d;
 
-tex.x = tex.x < 0 ? 0 : tex.x > 1 ? 1 : tex.x;
-tex.y = tex.y < 0 ? 0 : tex.y > 1 ? 1 : tex.y;
 
-float3 neighbourNormal = normalize(tex2D(NormalSampler, input.TexC + dVInS * d + Time * erosionDirection * 0.1).rgb * 2 - 1);
-float3 neighbourNormal1 = normalize(tex2D(NormalSampler, input.TexC + dVInS * d - Time * erosionDirection * 0.1).rgb * 2 - 1);
+
 float3 N = normalize(tex2D(NormalSampler, input.TexC + dVInS * d).rgb * 2 - 1);   // Get replacement normal
 
-float3 combine = normalize(N + neighbourNormal + neighbourNormal1);
-
-N = combine;
-
-//if (indent)
-//{
-//	N = combine;
-//}
 N = mul(N, Tangent2World);
 
 //return float4(N, 1);
 float brightness = 0.4 + 0.6 * saturate(dot(N, -LightDirection));
 //return float4(brightness.xxx, 1);
-
-float2 worldTex = input.WorldTexC + dVIns2 * d * Ratio;
-worldTex.x = worldTex.x < 0 ? 0 : worldTex.x > 1 ? 1 : worldTex.x;
-worldTex.y = worldTex.y < 0 ? 0 : worldTex.y > 1 ? 1 : worldTex.y;
-
 
 float2 newTex = input.TexC + dVInS * d;
 
@@ -185,7 +159,7 @@ deep /= 2.5;
 if(!Toggle)
 return float4(tex2D(DiffuseSampler, (input.WorldTexC + dVIns2 * d * Ratio) ).rgb * brightness - float3(darkener.xx, darkener * 0.8) - float3(deep.xx, deep * 0.8), 1);
 //return float4(brightness.xxx, 1);                              // Show lighting or
-return float4(tex2D(NormalSampler, input.TexC + dVInS * d).aaa ,1);
+return float4(tex2D(NormalSampler, input.TexC + dVInS * d).rgb ,1);
 //return float4(tex2D(DiffuseSampler, input.TexC + dVInS * d).rgb * brightness, 1);   // Show lighted texture
 }
 

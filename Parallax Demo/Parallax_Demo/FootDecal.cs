@@ -16,9 +16,14 @@ namespace Parallax_Demo
         Color[] pixels;
         Quaternion rotation;
         float rot_value;
+        float time;
+        RenderTarget2D texture;
 
-        public FootDecal(Vector3 position, Ground ground, float rotation, Texture2D normalMap)
+        public FootDecal(Vector3 position, Ground ground, float rotation, Texture2D normalMap, Footprint_Game game)
         {
+
+            time = 0;
+            texture = new RenderTarget2D(game.GraphicsDevice, 512, 512, true, SurfaceFormat.Color, DepthFormat.None);
             pixels = new Color[normalMap.Width * normalMap.Height];
             localPosition = new Vector3(position.X, 0, position.Z);
             vertices = new VertexTangentSpace[4];
@@ -137,5 +142,38 @@ namespace Parallax_Demo
         {
             get { return reverseIndices; }
         }
+
+        public Texture2D prepareTexture(Footprint_Game game)
+        {
+            
+            game.GraphicsDevice.SetRenderTarget(texture);
+            game.GraphicsDevice.Clear(Color.Transparent);
+
+            game.runningEffect.Parameters["Time"].SetValue(time);
+
+            foreach (EffectPass pass in game.runningEffect.CurrentTechnique.Passes)
+            //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                game.GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
+                     PrimitiveType.TriangleList, Vertices, 0, Vertices.Length, ReverseIndices, 0, Indices.Length / 3);
+            }
+            game.GraphicsDevice.SetRenderTarget(null);
+            return (Texture2D)texture;
+        }
+
+        public float Time
+        {
+            get { return time; }
+        }
+
+        public void Age()
+        {
+            //if (time < 0.25)
+                time += 0.001f;
+            
+        }
     }
+
+    
 }

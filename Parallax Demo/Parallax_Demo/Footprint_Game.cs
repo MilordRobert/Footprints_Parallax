@@ -63,12 +63,12 @@ namespace Parallax_Demo
         SpriteBatch spriteBatch;
         //VertexPositionNormalTexture[] beach;
         //int[] indicesBeach;
-        Effect beachMaterial;
-        Effect parallaxEffect;
-        Effect runningEffect;
-        Texture2D normalMap;
-        Texture2D hole;
-        Texture2D extract;
+        public Effect beachMaterial;
+        public Effect parallaxEffect;
+        public Effect runningEffect;
+        public Texture2D normalMap;
+        public Texture2D hole;
+        public Texture2D extract;
         Texture2D sand;
         int footstep = 0;
         FootDecal footprint;
@@ -76,7 +76,7 @@ namespace Parallax_Demo
         List<FootDecal> steps = new List<FootDecal>();
         SpriteFont font;
         int toggle = 0;
-        int toggle1 = 0;
+        public int toggle1 = 0;
         Vector3 position;
         Matrix world, view, perspective;
         MouseState last_mouse_state;
@@ -128,17 +128,6 @@ namespace Parallax_Demo
                 sand.Direction.Normalize();
                 sand.Position = RandomVector() * size + location;
                 chunks.Add(sand);
-            }
-        }
-
-        public void move_SandParticles()
-        {
-            for(int i = 0; i < chunks.Count; i++)
-            {
-                Sand_Particle sand = chunks[i];
-                if(sand.Position.Y > 0f)
-                sand.Position += new Vector3(0, -0.13f, 0);
-                chunks[i] = sand;
             }
         }
 
@@ -201,14 +190,26 @@ namespace Parallax_Demo
             chunk1 = Content.Load<Model>("chunk1");
             chunk2 = Content.Load<Model>("chunk2");
 
-            footprint = new FootDecal(new Vector3(10f, 0, 12f), beach, 3.14f, normalMap);
+            footprint = new FootDecal(new Vector3(10f, 0, 12f), beach, 3.14f, normalMap, this);
             steps.Add(footprint);
-            overlap = new FootDecal(new Vector3(9f, 0, 10f),  beach, 3.14f/4f,normalMap);
+            overlap = new FootDecal(new Vector3(9f, 0, 10f),  beach, 3.14f/4f,normalMap, this);
             steps.Add(overlap);
 
+            
+            foreach (ModelMesh mesh in chunk1.Meshes)
+            {
+                foreach(ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = beachMaterial;
+                }
+                //foreach (BasicEffect effect in mesh.Effects)
+                //{
+                //    effect.EnableDefaultLighting();
+                //    effect.DirectionalLight0.Direction = lightdir.Direction;
+                //}
+            }
 
-            particle = Content.Load<Model>("sandparticle");
-            foreach (ModelMesh mesh in particle.Meshes)
+            foreach (ModelMesh mesh in chunk2.Meshes)
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
@@ -216,8 +217,6 @@ namespace Parallax_Demo
                     effect.DirectionalLight0.Direction = lightdir.Direction;
                 }
             }
-
-            add_SandParticles(4, new Vector3(8f, 0, 10f), 30);
 
             // TODO: use this.Content to load your game content here
         }
@@ -247,64 +246,6 @@ namespace Parallax_Demo
             //    //steps.Add(footprint);
             //}
 
-
-            //foreach (FootDecal f in steps)
-            //{
-            //    System.Drawing.RectangleF collision_area = System.Drawing.RectangleF.Intersect(f.Bounds, footprint.Bounds);
-            //    if (!collision_area.IsEmpty)
-            //    {
-            //        Matrix mainBasis = Matrix.CreateWorld(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0, 1, 0));
-            //        Matrix toFootprint = Matrix.CreateWorld(footprint.Position, new Vector3(0, 0, -1), new Vector3(0, 1, 0));
-            //        Matrix toF = Matrix.CreateWorld(f.Position, new Vector3(0, 0, -1), new Vector3(0, 1, 0));
-            //        Matrix fromFoot = Matrix.Invert(toFootprint);
-            //        Matrix FoottoFoot = fromFoot * toF;
-
-            //        for (float x = collision_area.X; x < collision_area.X + collision_area.Width; x += f.Length_X / normalMap.Width)
-            //        {
-            //            for (float z = collision_area.Y; z < collision_area.Y + collision_area.Height; z += f.Length_Z / normalMap.Height)
-            //            {
-            //                float pixel_x = Math.Abs(collision_area.X - footprint.Vertices[0].Position.X);
-            //                float pixel_z = Math.Abs(collision_area.Y - footprint.Vertices[0].Position.Z);
-            //                float F_Z = Math.Abs(collision_area.Y - f.Vertices[0].Position.Z);
-            //                float F_X = Math.Abs(collision_area.X - f.Vertices[0].Position.X);
-            //                pixel_x /= footprint.Length_X;
-            //                pixel_z /= footprint.Length_Z;
-            //                F_X /= f.Length_X;
-            //                F_Z /= f.Length_Z;
-            //                int indexFoot = (int)pixel_x * (int)pixel_z * footprint.Pixels.Length;
-            //                int indexF = (int)F_X * (int)F_Z * footprint.Pixels.Length;
-
-            //                if (indexFoot < footprint.Pixels.Length && indexF < f.Pixels.Length)
-            //                {
-            //                    Color footPixel = footprint.Pixels[indexFoot];
-            //                    Color fPixel = footprint.Pixels[indexF];
-
-            //                    float alpha = 0;//(byte)(0.1 * Math.Max(fPixel.A, footPixel.A) + Math.Min(fPixel.A, footPixel.A));
-
-            //                    Vector3 normals = footPixel.ToVector3();
-            //                    Vector3 normalsF = fPixel.ToVector3();
-
-
-
-            //                    Vector3 finalNormals = normals + normalsF;
-            //                    Vector4 colour = new Vector4(finalNormals, alpha);
-
-            //                    fPixel = new Color(Vector4.Zero);
-            //                    footPixel = new Color(Vector4.Zero);
-
-            //                    footprint.Pixels[indexFoot] = footPixel;
-            //                    f.Pixels[indexF] = fPixel;
-            //                }
-            //            }
-
-
-
-            //        }
-
-            //    }
-            //}
-            // }
-
             if (Keyboard.GetState().IsKeyDown(Keys.Left)) overlap.Z += 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Right)) overlap.Z -= 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Up)) overlap.X += 0.05f;
@@ -333,15 +274,8 @@ namespace Parallax_Demo
             last_mouse_state = Mouse.GetState();
 
             view = Matrix.CreateLookAt(character.Position, character.Position + character.Forward, character.Up);
-            //view = Matrix.CreateLookAt(position, position + forward, up);
             perspective = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100.0f);
-            // positionDir = Vector3.Transform(position, Matrix.CreateRotationY(heading));
-            // TODO: Add your update logic here
-            move_SandParticles();
-            if (Keyboard.GetState().IsKeyDown(Keys.G)) time += 0.001f;
-
-            if(time > 0.25)
-            time = 0.25f;
+            if (Keyboard.GetState().IsKeyDown(Keys.G)) footprint.Age();
 
             base.Update(gameTime);
         }
@@ -352,27 +286,16 @@ namespace Parallax_Demo
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+
+            List<Texture2D> images = new List<Texture2D>();
             GraphicsDevice.Clear(Color.Violet);
 
             collision.Parameters["View"].SetValue(view);
             collision.Parameters["Projection"].SetValue(perspective);
             collision.Parameters["NormalMap"].SetValue(normalMap);
 
-            //BlendState bs_save = GraphicsDevice.BlendState;
-            //BlendState bs = new BlendState();
-            //const float factor = 0.5f;
-            //bs.BlendFactor = new Color(factor, factor, factor);
-            //bs.ColorBlendFunction = BlendFunction.Add;
-            //bs.ColorSourceBlend = Blend.BlendFactor;
-            //bs.ColorDestinationBlend = Blend.BlendFactor;
-            //bs.AlphaBlendFunction = BlendFunction.Max;
-            //bs.AlphaSourceBlend = Blend.One;
-            //bs.AlphaDestinationBlend = Blend.One;
-            //GraphicsDevice.BlendState = bs;
             GraphicsDevice.SetRenderTarget(collisionMap);
             GraphicsDevice.Clear(Color.Transparent);
-            // DepthStencilState ds = GraphicsDevice.DepthStencilState;
-            //spriteBatch.Begin(SpriteSortMode.BackToFront, bs);
             //foreach (FootDecal f in steps)
             //{
             //collision.Parameters["World"].SetValue(f.World * Matrix.Invert(steps[0].World));
@@ -401,39 +324,9 @@ namespace Parallax_Demo
             runningEffect.Parameters["NormalMap"].SetValue(normalMap);
             runningEffect.Parameters["SecondMap"].SetValue(hole);
             runningEffect.Parameters["Extract"].SetValue(extract);
-            runningEffect.Parameters["Toggle"].SetValue(toggle1);
-            foreach (EffectPass pass in runningEffect.CurrentTechnique.Passes)
-            //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
-                     PrimitiveType.TriangleList, footprint.Vertices, 0, footprint.Vertices.Length, footprint.ReverseIndices, 0, footprint.Indices.Length / 3);
-            }
-            // break;
+            runningEffect.Parameters["Running"].SetValue(toggle1);
+            images.Add(footprint.prepareTexture(this));
 
-            //spriteBatch.Draw(normalMap, new Vector2(0, 0), null, Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
-            //spriteBatch.Draw(normalMap, new Vector2(256, -256), null, Color.White, f.RotationY, new Vector2(0, 0), 1, SpriteEffects.None, 0);
-            //break;
-            //
-            ////parallaxEffect.Parameters["World"].SetValue(f.World);
-            ////normalMap.SetData<Color>(f.Pixels);
-
-
-            //BlendState newBS = new BlendState();
-            //newBS.BlendFactor = new Color(factor, factor, factor, 1);
-            //newBS.ColorBlendFunction = BlendFunction.Add;
-            //newBS.ColorSourceBlend = Blend.BlendFactor;
-            //newBS.ColorDestinationBlend = Blend.BlendFactor;
-            //newBS.AlphaBlendFunction = BlendFunction.Max;
-            //newBS.AlphaSourceBlend = Blend.One;
-            //newBS.AlphaDestinationBlend = Blend.One;
-            //GraphicsDevice.BlendState = newBS;
-            // GraphicsDevice.Textures[0] = null;
-            // }
-
-            //spriteBatch.End();
-            //GraphicsDevice.BlendState = bs_save;
-            //GraphicsDevice.DepthStencilState = ds;
             GraphicsDevice.SetRenderTarget(null);
             //FileStream file = new FileStream("SlumpParallax.png", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             //collisionMap.SaveAsPng(file, 512, 512);
@@ -451,7 +344,6 @@ namespace Parallax_Demo
                      PrimitiveType.TriangleList, beach.Vertices, 0, beach.Vertices.Length, beach.Indices, 0, beach.Indices.Length/3);
             }
             Vector2 ratio = new Vector2(footprint.Length_X / beach.Length_X, -footprint.Length_Z / beach.Length_Z);
-            parallaxEffect.Parameters["World"].SetValue(world);
             parallaxEffect.Parameters["View"].SetValue(view);
             parallaxEffect.Parameters["Projection"].SetValue(perspective);
             parallaxEffect.Parameters["DiffuseTex"].SetValue(sand);
@@ -459,6 +351,7 @@ namespace Parallax_Demo
             parallaxEffect.Parameters["CameraPosition"].SetValue(character.Position);
             parallaxEffect.Parameters["Toggle"].SetValue(toggle);
             parallaxEffect.Parameters["Ratio"].SetValue(ratio);
+            parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
 
             DepthStencilState ds_save = GraphicsDevice.DepthStencilState;
             DepthStencilState ds = new DepthStencilState();
@@ -468,16 +361,6 @@ namespace Parallax_Demo
             ds.StencilFunction = CompareFunction.Always;
             ds.StencilPass = StencilOperation.Increment;
             GraphicsDevice.DepthStencilState = ds;
-            //BlendState bs_save = GraphicsDevice.BlendState;
-            //const float factor = 0.5f;
-            //BlendState newBS = new BlendState();
-            //newBS.BlendFactor = new Color(factor, factor, factor, 1);
-            //newBS.ColorBlendFunction = BlendFunction.Add;
-            //newBS.ColorSourceBlend = Blend.Zero;
-            //newBS.ColorDestinationBlend = Blend.InverseSourceAlpha;
-            //newBS.AlphaDestinationBlend = Blend.One;
-            //GraphicsDevice.BlendState = newBS;
-
 
             //foreach (FootDecal f in steps)
             //{
@@ -497,30 +380,36 @@ namespace Parallax_Demo
             parallaxEffect.Parameters["World"].SetValue(footprint.World);
             //normalMap.SetData<Color>(f.Pixels);
             //parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
-             //parallaxEffect.Parameters["NormalTex"].SetValue((Texture2D)collisionMap);
-            parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
-            parallaxEffect.Parameters["WindDirection"].SetValue(new Vector3(1, 1, 1));
-            parallaxEffect.Parameters["Time"].SetValue(time);
+            parallaxEffect.Parameters["NormalTex"].SetValue(images[0]);
+            //parallaxEffect.Parameters["NormalTex"].SetValue((Texture2D)collisionMap);
             foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
-            //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
                      PrimitiveType.TriangleList, footprint.Vertices, 0, footprint.Vertices.Length, footprint.Indices, 0, footprint.Indices.Length / 3);
             }
-            parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
-            //GraphicsDevice.BlendState = bs_save;
+            //parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
             GraphicsDevice.DepthStencilState = ds_save;
-            //break;
-
-
-            // GraphicsDevice.Textures[0] = null;
-            //}
 
             lightdir.Draw(graphics, view, perspective);
            // draw_SandParticles(view, perspective);
-            sun.Draw(Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(lightdir.Direction * new Vector3(30, -30, 30)), view, perspective);
+            sun.Draw(Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(lightdir.Direction * new Vector3(30, -30, -30)), view, perspective);
             base.Draw(gameTime);
+
+            //foreach(ModelMesh mesh in chunk1.Meshes)
+            //{
+            //    foreach(ModelMeshPart part in mesh.MeshParts)
+            //    {
+            //        part.Effect = beachMaterial;
+            //        beachMaterial.Parameters["World"].SetValue(Matrix.CreateScale(0.2f) * Matrix.CreateRotationX(-(float)Math.PI / 2) * Matrix.CreateRotationY(-(float)Math.PI / 1.2f) * footprint.World * Matrix.CreateTranslation(new Vector3(1f, 0f, 1f)));
+            //        beachMaterial.Parameters["View"].SetValue(view);
+            //        beachMaterial.Parameters["Projection"].SetValue(perspective);
+            //        beachMaterial.Parameters["LightDirection"].SetValue(lightdir.Direction);
+            //    }
+            //    //chunk1.Draw(footprint.World * Matrix.CreateTranslation(new Vector3(1f, 0, 1f)), view, perspective);
+            //    mesh.Draw();
+            //}
+           
         }
     }
 }
