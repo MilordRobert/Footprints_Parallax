@@ -27,7 +27,7 @@ namespace Parallax_Demo
 
         public void reset_Position()
         {
-            position = new Vector3(0, 02f, 5);
+            position = new Vector3(-20, 2f, -30);
             rotation = new Vector3(0, 0, 0);
             forward = new Vector3(0, 0, -1);
             right = new Vector3(1, 0, 0);
@@ -82,6 +82,7 @@ namespace Parallax_Demo
             up = Vector3.Cross(right, forward);
 
             if (Keyboard.GetState().IsKeyDown(Keys.W)) position += movement * forward;
+            if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && kbs.IsKeyUp(Keys.LeftControl)) position.Y = position.Y > 1.4f ? 1.4f : 2;
             if (Keyboard.GetState().IsKeyDown(Keys.S)) position -= movement * forward;
             if (Keyboard.GetState().IsKeyDown(Keys.A)) position -= movement * right;
             if (Keyboard.GetState().IsKeyDown(Keys.D)) position += movement * right;
@@ -90,6 +91,7 @@ namespace Parallax_Demo
                         Matrix.CreateRotationX(elevation) * Matrix.CreateRotationY(-heading)
                         );
             rotation = new Vector3(0, -heading, 0);
+            kbs = Keyboard.GetState();
 
         }
     }

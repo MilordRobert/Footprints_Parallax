@@ -1,9 +1,10 @@
 float4x4 World;
 texture NormalMap;
-texture SecondMap;
+//texture SecondMap;
 texture Extract;
 int Running;
 float Time;
+float size;
 // TODO: add effect parameters here.
 
 sampler NormalSampler = sampler_state
@@ -13,12 +14,12 @@ sampler NormalSampler = sampler_state
 	addressv = Wrap;
 };
 
-sampler SecondSampler = sampler_state
-{
-	Texture = <SecondMap>;
-	addressu = Wrap;
-	addressv = Wrap;
-};
+//sampler SecondSampler = sampler_state
+//{
+//	Texture = <SecondMap>;
+//	addressu = Wrap;
+//	addressv = Wrap;
+//};
 
 sampler ExtractSampler = sampler_state
 {
@@ -49,7 +50,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 {
 	VertexShaderOutput output;
 	float4 worldPosition = mul(input.Position, World);
-	worldPosition = float4(worldPosition.xz * float2(0.5, 0.5), 0.5, 1);
+	worldPosition = float4(worldPosition.xz * float2(size, size), 0.5, 1);
 	//float4 viewPosition = mul(worldPosition, View);
 	output.Position = worldPosition;
 	output.TexC = input.TexC;
@@ -71,13 +72,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	{
 		float multiplier = 1 - input.TexC.y - 0.5;
 		if (multiplier < -0.1)
-			multiplier = 0;
+			multiplier = -0.1;
 		float depth1 = firstTex.a / 4;
 		//float depth2 = secondTex.a;
 		float depth3 = extractTex.a / 3;
 		float depth = firstTex.a / 3;
 		//float depth = depth2 < 0.0006 ? depth1 : depth1 + depth2 * 1.5;
-		depth = depth1 >= 0.0006 ? depth + (multiplier * multiplier * multiplier) * depth * 100: depth;
+		depth = depth1 >= 0.0006 ? depth + (multiplier * multiplier * multiplier) * depth * 200: depth;
 		depth = depth3 > 0.0004 ? depth - depth3 : depth;
 		//return float4((depth + 0.5).xxx, 1);
 		//return float4((multiplier).xxx, 1);
@@ -105,7 +106,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 windDirection = float3(1, 1, 0.5);
 	float3 normal = firstTex.rgb * 2 - 1;
 	float depth = firstTex.a;
-	
+	//
 	for (int i = 0; i < 8; i++)
 	{
 		float C = dot(-normal, windDirection) * depth + depth * 4;
@@ -114,7 +115,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		//float cLeft = abs(dot(-nLeft.rgb, windDirection) * nLeft.a + nLeft.a * 4);
 		//float cRight = abs(dot(-nRight.rgb, windDirection) * nLeft.a + nLeft.a * 4);
 
-		C = abs(C);
+		//C = abs(C);
 		//C = C == 0.1 ? 0.11 : C;
 		float limit = 0.1;
 		float newDepth = depth - timeSegment * (C - limit);
@@ -122,7 +123,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		nDown.a = nDown.a - timeSegment * (cDown - limit);
 		//nLeft.a = nLeft.a - timeSegment * (cLeft - limit);
 		//nRight.a = nRight.a - timeSegment * (cRight - limit);
-		newDepth = max(newDepth, 0.001);
+		//newDepth = max(newDepth, 0.001);
+
 		depth = newDepth;
 		//normal = normalize(normal + float3(0, 0, 10 * timeSegment * (C - limit)));
 		nUp.xyz = normalize(nUp.xyz + float3(0, 0, 10 * timeSegment * (cUp - limit)));

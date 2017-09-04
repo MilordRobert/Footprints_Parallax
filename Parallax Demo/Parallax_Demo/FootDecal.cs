@@ -18,10 +18,18 @@ namespace Parallax_Demo
         float rot_value;
         float time;
         RenderTarget2D texture;
+        protected float size;
+        bool running = false;
+        bool right = true;
+        float weight;
+        FootDecal overlap = null;
 
-        public FootDecal(Vector3 position, Ground ground, float rotation, Texture2D normalMap, Footprint_Game game)
+        public FootDecal(Vector3 position, float size, Ground ground, float rotation, Texture2D normalMap, Footprint_Game game, bool running, bool right, float weight)
         {
-
+            this.weight = weight;
+            this.right = right;
+            this.size = size;
+            this.running = running;
             time = 0;
             texture = new RenderTarget2D(game.GraphicsDevice, 512, 512, true, SurfaceFormat.Color, DepthFormat.None);
             pixels = new Color[normalMap.Width * normalMap.Height];
@@ -42,12 +50,10 @@ namespace Parallax_Demo
             rot_value = rotation;
             this.rotation = Quaternion.CreateFromAxisAngle(new Vector3(0,1,0), rotation);
             this.rotation.Normalize();
-
-            vertices[00].Position = new Vector3(-2f, 0, 2f);
-            vertices[01].Position = new Vector3(2f, 0, 2f);
-            vertices[02].Position = new Vector3(-2f, 0, -2f);
-            vertices[03].Position = new Vector3(2f, 0, -2f);
-
+            vertices[00].Position = new Vector3(-size, 0, size);
+            vertices[01].Position = new Vector3(size, 0, size);
+            vertices[02].Position = new Vector3(-size, 0, -size);
+            vertices[03].Position = new Vector3(size, 0, -size);
 
             for(int i = 0; i < vertices.Length; i++)
             {
@@ -65,6 +71,11 @@ namespace Parallax_Demo
             get { return indices; }
         }
 
+        public float Weight
+        {
+            get { return weight; }
+        }
+
         public VertexTangentSpace[] Vertices
         {
             get { return vertices; }
@@ -75,6 +86,11 @@ namespace Parallax_Demo
             get { return vertices[1].Position.X - vertices[0].Position.X; }
         }
 
+        public FootDecal Overlap
+        {
+            set { overlap = value; }
+        }
+
         public float Length_Z
         {
             get { return vertices[0].Position.Z - vertices[2].Position.Z; }
@@ -82,7 +98,9 @@ namespace Parallax_Demo
 
         public System.Drawing.RectangleF Bounds
         {
-            get { return new System.Drawing.RectangleF(vertices[0].Position.X, vertices[0].Position.Z, Length_X, Length_Z); }
+            get {
+                Vector3 x = Vector3.Transform(vertices[0].Position, World);
+                return new System.Drawing.RectangleF(x.X, x.Z, Length_X, Length_Z); }
         }
 
         public Vector3 Position
@@ -129,7 +147,16 @@ namespace Parallax_Demo
             get { return rotation.Y; }
         }
 
+        public bool RightFoot
+        {
+            get { return right; }
+        }
 
+        /// <summary>
+        /// The rotation value around the Y axis.
+        /// The get method simply returns the float value of that rotation
+        /// The set method constructs a quaternion that will rotate by the given float value
+        /// </summary>
         public float Rotation
         {
             get { return rot_value; }
@@ -138,28 +165,66 @@ namespace Parallax_Demo
             }
         }
 
+        /// <summary>
+        /// The indices in reverse order.
+        /// This is mostly used when rendering a temporary image that will later be rendered to the screen using the proper indices
+        /// </summary>
         public int[] ReverseIndices
         {
             get { return reverseIndices; }
         }
 
-        public Texture2D prepareTexture(Footprint_Game game)
+        /// <summary>
+        /// Creates the texture what will be used to render the footprint with a parallax map.
+        /// This may include a map for running, erosion and overlapping
+        /// </summary>
+        /// <param name="game">The base game, used to set parameters for shaders</param>
+        /// <returns></returns>
+        public virtual Texture2D prepareTexture(Footprint_Game game)
         {
-            
+            //if(running)
+            //{
             game.GraphicsDevice.SetRenderTarget(texture);
             game.GraphicsDevice.Clear(Color.Transparent);
-
             game.runningEffect.Parameters["Time"].SetValue(time);
+            game.runningEffect.Parameters["Running"].SetValue(running);
+            game.runningEffect.Parameters["size"].SetValue(1/size);
 
             foreach (EffectPass pass in game.runningEffect.CurrentTechnique.Passes)
-            //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 game.GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
-                     PrimitiveType.TriangleList, Vertices, 0, Vertices.Length, ReverseIndices, 0, Indices.Length / 3);
+                        PrimitiveType.TriangleList, Vertices, 0, Vertices.Length, ReverseIndices, 0, Indices.Length / 3);
             }
             game.GraphicsDevice.SetRenderTarget(null);
+
+            //if(overlap != null)
+            //{
+            //    Matrix m = World * Matrix.CreateTranslation(0, 0, -0.3f);
+            //    game.collision.Parameters["World"].SetValue(Matrix.Identity);
+            //    game.collision.Parameters["SecondWorld"].SetValue(World * Matrix.Invert(m));
+            //    game.collision.Parameters["SecondWorldInverse"].SetValue(World * Matrix.Invert(m));
+            //    //collision.Parameters["SecondWorld"].SetValue(footprint.World * Matrix.Invert(overlap.World));
+            //    //collision.Parameters["SecondWorldInverse"].SetValue(Matrix.Invert(footprint.World * Matrix.Invert(overlap.World)));
+            //    game.collision.Parameters["TopLeft"].SetValue(overlap.Vertices[0].TextureCoordinate);
+            //    game.collision.Parameters["TopRight"].SetValue(overlap.Vertices[1].TextureCoordinate);
+            //    game.collision.Parameters["BottomLeft"].SetValue(overlap.Vertices[2].TextureCoordinate);
+            //    game.collision.Parameters["Length"].SetValue(overlap.Length_X);
+            //    // collision.Parameters["SecondMap"].SetValue(normalMap);
+            //    foreach (EffectPass pass in game.collision.CurrentTechnique.Passes)
+            //    //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
+            //    {
+            //        pass.Apply();
+            //        game.GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
+            //             PrimitiveType.TriangleList, Vertices, 0, Vertices.Length, ReverseIndices, 0, Indices.Length / 3);
+            //    }
+            //}
+           
             return (Texture2D)texture;
+            //}
+
+            //return game.normalMap;
+            
         }
 
         public float Time
@@ -170,8 +235,7 @@ namespace Parallax_Demo
         public void Age()
         {
             //if (time < 0.25)
-                time += 0.001f;
-            
+                time += 0.001f;      
         }
     }
 

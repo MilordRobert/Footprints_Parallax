@@ -56,8 +56,10 @@ namespace Parallax_Demo
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Footprint_Game : Microsoft.Xna.Framework.Game
+    public class Footprint_Game : Game
     {
+        const float CHILD_FOOT_SIZE = 0.6f;
+        const float ADULT_FOOT_SIZE = 1.0f;
         LightDirectionDisplay lightdir;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -67,7 +69,7 @@ namespace Parallax_Demo
         public Effect parallaxEffect;
         public Effect runningEffect;
         public Texture2D normalMap;
-        public Texture2D hole;
+        public Texture2D leftFoot;
         public Texture2D extract;
         Texture2D sand;
         int footstep = 0;
@@ -84,7 +86,7 @@ namespace Parallax_Demo
         Player character;
         Ground beach;
         RenderTarget2D collisionMap;
-        Effect collision;
+        public Effect collision;
         Model sun;
         Model particle;
         Model chunk1;
@@ -92,15 +94,82 @@ namespace Parallax_Demo
         Random rand = new Random();
         List<Sand_Particle> chunks = new List<Sand_Particle>();
         float time = 0;
-
+        bool child_right = true;
+        bool adult_right = true;
+        bool right = true;
+        int count = 0;
+        bool once = false;
 
         public Footprint_Game()
         {
+            
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
             //graphics.ToggleFullScreen();
             Content.RootDirectory = "Content";
             character = new Player();
-            
+            //graphics.ToggleFullScreen();
+        }
+
+        public void set_scene()
+        {
+            //FootDecal foot = new FootDecal(new Vector3(-20, 0, -35), ADULT_FOOT_SIZE, beach, 0, normalMap, this, false, adult_right, 0.15f);
+            ////steps.Add(foot);
+            //FootDecal f = new DecalOverlap(foot,new Vector3(-21, 0, -35f), ADULT_FOOT_SIZE, beach, (float)Math.PI / 3, normalMap, this, false, adult_right, 0.15f);
+            //steps.Add(f);
+            add_adult(new Vector3(-6, 0, -8.5f), 3.14f / 8f, 0.1f);
+            add_adult(new Vector3(-9, 0, -10), 3.14f / 8f, 0.1f);
+            add_adult(new Vector3(-8, 0, -12), 3.14f / 8f, 0.1f);
+            add_adult(new Vector3(-11, 0, -13), 3.14f / 6f, 0.1f);
+            add_adult(new Vector3(-10, 0, -15), 3.14f / 5f, 0.1f);
+            add_adult(new Vector3(-13, 0, -15), 3.14f / 4f, 0.1f);
+            add_adult(new Vector3(-13, 0, -18), 3.14f / 4f, 0.1f);
+            add_adult(new Vector3(-16, 0, -18), 3.14f / 4f, 0.1f);
+            add_adult(new Vector3(-16, 0, -21), 3.14f / 4f, 0.1f);
+            add_adult(new Vector3(-7, 0, -6), 3.14f / 8f, 0.1f);
+            add_adult(new Vector3(-4, 0, -5f), 3.14f / 4f, 0.25f);
+            add_adult(new Vector3(-5, 0, -3.5f), 3.14f / 4f, 0.25f);
+
+            add_child(new Vector3(-25, 0, -14), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-23.5f, 0, -12f), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-21, 0, -12), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-19.5f, 0, -10), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-17, 0, -10), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-15.5f, 0, -8), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-13, 0, -8), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-11.5f, 0, -6), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-9, 0, -6f), 3.14f / 3f, 0.1f);
+            add_child(new Vector3(-8f, 0, -3.5f), 3.14f / 3f, 0.2f);
+            add_child(new Vector3(-7.5f, 0, -4.5f), 3.14f / 3f, 0.2f);
+
+            add_adult(new Vector3(-2, 0, -3), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(-2, 0, -0.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(1f, 0, -1), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(1, 0, 1.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(4, 0, 2), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(4, 0, 4.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(7, 0, 5), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(7, 0, 7.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(10, 0, 8), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(10, 0, 10.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(13, 0, 11), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(13, 0, 13.5f), 3.14f / 4f, 0.2f);
+            add_adult(new Vector3(16, 0, 14), 3.14f / 4f, 0.2f);
+        }
+
+        public void add_adult(Vector3 pos, float rotation, float weight)
+        {
+            FootDecal foot = new FootDecal(pos, ADULT_FOOT_SIZE, beach, rotation, normalMap, this, false, adult_right, weight);
+            steps.Add(foot);
+            adult_right = !adult_right;
+        }
+
+        public void add_child(Vector3 pos, float rotation, float weight)
+        {
+            FootDecal foot = new FootDecal(pos, CHILD_FOOT_SIZE, beach, rotation, normalMap, this, true, child_right, weight);
+            steps.Add(foot);
+            child_right = !child_right;
         }
 
         void ResetNavigation()
@@ -170,7 +239,7 @@ namespace Parallax_Demo
             font = Content.Load<SpriteFont>("characters");
             lightdir = new LightDirectionDisplay(graphics);
             beach = new Ground();
-            collisionMap = new RenderTarget2D(GraphicsDevice, 512, 512, true, SurfaceFormat.Color, DepthFormat.None);
+            collisionMap = new RenderTarget2D(GraphicsDevice, 1024, 1024, true, SurfaceFormat.Color, DepthFormat.None);
             
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -181,7 +250,7 @@ namespace Parallax_Demo
             sand = Content.Load<Texture2D>("Sand");
             beachMaterial.Parameters["DiffuseTex"].SetValue(sand);
 
-            hole = Content.Load<Texture2D>("lumpParallax3");
+            leftFoot = Content.Load<Texture2D>("LeftParallax");
             parallaxEffect = Content.Load<Effect>("Parallax");
             collision = Content.Load<Effect>("DualOverlap");
             normalMap = Content.Load<Texture2D>("FootPerfect");
@@ -190,11 +259,11 @@ namespace Parallax_Demo
             chunk1 = Content.Load<Model>("chunk1");
             chunk2 = Content.Load<Model>("chunk2");
 
-            footprint = new FootDecal(new Vector3(10f, 0, 12f), beach, 3.14f, normalMap, this);
-            steps.Add(footprint);
-            overlap = new FootDecal(new Vector3(9f, 0, 10f),  beach, 3.14f/4f,normalMap, this);
-            steps.Add(overlap);
-
+            //footprint = new FootDecal(new Vector3(10f, 0, 12f), 2,beach, 3.14f, normalMap, this, false);
+            //steps.Add(footprint);
+            //overlap = new FootDecal(new Vector3(9f, 0, 10f), 1,  beach, 3.14f/4f,normalMap, this, false);
+            //steps.Add(overlap);
+            set_scene();
             
             foreach (ModelMesh mesh in chunk1.Meshes)
             {
@@ -202,11 +271,6 @@ namespace Parallax_Demo
                 {
                     part.Effect = beachMaterial;
                 }
-                //foreach (BasicEffect effect in mesh.Effects)
-                //{
-                //    effect.EnableDefaultLighting();
-                //    effect.DirectionalLight0.Direction = lightdir.Direction;
-                //}
             }
 
             foreach (ModelMesh mesh in chunk2.Meshes)
@@ -237,28 +301,45 @@ namespace Parallax_Demo
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            //if (2 == gameTime.TotalGameTime.Seconds)
+            //if()
+            //if (count == 40 && once == false)
             //{
 
-            //    FootDecal f = new FootDecal(character.Position, beach, character.Rotation, normalMap);
+            //    FootDecal f = new FootDecal(character.Position, ADULT_FOOT_SIZE, beach, character.Rotation.Y + (float)Math.PI, normalMap, this, false, right, 0.1f);
+
+            //    right = !right;
+            //    count = 0;
+            //    //foreach (FootDecal f1 in steps)
+            //    //{
+            //    //    if (f.Bounds.IntersectsWith(f1.Bounds))
+            //    //    {
+            //    //        steps.Remove(f1);
+            //    //        once = true;
+            //    //        f = new DecalOverlap(f1, character.Position, ADULT_FOOT_SIZE, beach, character.Rotation.Y + (float)Math.PI, normalMap, this, false, right, 0.1f);
+            //    //        break;
+            //    //    }
+            //    //}
+
             //    steps.Add(f);
             //    //FootDecal footprint = new FootDecal(character.Position, beach, normalMap);
             //    //steps.Add(footprint);
             //}
+            //else
+            //    count++;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left)) overlap.Z += 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Right)) overlap.Z -= 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Up)) overlap.X += 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Down)) overlap.X -= 0.05f;
             if (Keyboard.GetState().IsKeyDown(Keys.Q)) footprint.Rotation += 0.02f;
-            if (Keyboard.GetState().IsKeyDown(Keys.E)) footprint.Rotation -= 0.02f;
+            //if (Keyboard.GetState().IsKeyDown(Keys.E)) footprint.Rotation -= 0.02f;
+            if (Keyboard.GetState().IsKeyDown(Keys.E)) once = true;
             footstep = gameTime.TotalGameTime.Seconds;
 
             // Allows the game to exit
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit();
 
             world = Matrix.CreateTranslation(new Vector3(0,0,0));
-            //world = world * Matrix.CreateRotationY((float)gameTime.TotalGameTime.TotalSeconds);
             
             lightdir.Update(Keyboard.GetState());
 
@@ -290,12 +371,32 @@ namespace Parallax_Demo
             List<Texture2D> images = new List<Texture2D>();
             GraphicsDevice.Clear(Color.Violet);
 
-            collision.Parameters["View"].SetValue(view);
-            collision.Parameters["Projection"].SetValue(perspective);
-            collision.Parameters["NormalMap"].SetValue(normalMap);
+            //collision.Parameters["View"].SetValue(view);
+            //collision.Parameters["Projection"].SetValue(perspective);
+            //collision.Parameters["NormalMap"].SetValue(normalMap);
 
+           // GraphicsDevice.SetRenderTarget(collisionMap);
+            //GraphicsDevice.Clear(Color.Transparent);
             GraphicsDevice.SetRenderTarget(collisionMap);
-            GraphicsDevice.Clear(Color.Transparent);
+            //GraphicsDevice.Clear(Color.Transparent);
+            //foreach (FootDecal f in steps)
+            //collision.Parameters["NormalMap"].SetValue(normalMap);
+            //collision.Parameters["size"].SetValue(0.25f);
+            //collision.Parameters["World"].SetValue(Matrix.Identity);
+            //collision.Parameters["SecondWorld"].SetValue(steps[0].World * Matrix.Invert(steps[1].World));
+            //collision.Parameters["SecondWorldInverse"].SetValue(Matrix.Invert(steps[0].World * Matrix.Invert(steps[1].World)));
+            //collision.Parameters["TopLeft"].SetValue(steps[1].Vertices[0].TextureCoordinate);
+            //collision.Parameters["TopRight"].SetValue(steps[1].Vertices[1].TextureCoordinate);
+            //collision.Parameters["BottomLeft"].SetValue(steps[1].Vertices[2].TextureCoordinate);
+            //collision.Parameters["Length"].SetValue(steps[1].Length_X);
+            //collision.Parameters["SecondMap"].SetValue(normalMap);
+            //foreach (EffectPass pass in collision.CurrentTechnique.Passes)
+            //{
+            //    pass.Apply();
+            //    GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
+            //         PrimitiveType.TriangleList, steps[0].Vertices, 0, steps[0].Vertices.Length, steps[0].ReverseIndices, 0, steps[0].Indices.Length / 3);
+            //}
+            //GraphicsDevice.SetRenderTarget(null);
             //foreach (FootDecal f in steps)
             //{
             //collision.Parameters["World"].SetValue(f.World * Matrix.Invert(steps[0].World));
@@ -321,13 +422,24 @@ namespace Parallax_Demo
             //    }
 
             runningEffect.Parameters["World"].SetValue(Matrix.Identity);
-            runningEffect.Parameters["NormalMap"].SetValue(normalMap);
-            runningEffect.Parameters["SecondMap"].SetValue(hole);
+            
+            //runningEffect.Parameters["SecondMap"].SetValue(hole);
             runningEffect.Parameters["Extract"].SetValue(extract);
             runningEffect.Parameters["Running"].SetValue(toggle1);
-            images.Add(footprint.prepareTexture(this));
+
+            foreach(FootDecal f in steps)
+            {
+                if(f.RightFoot)
+                    runningEffect.Parameters["NormalMap"].SetValue(normalMap);
+                else
+                    runningEffect.Parameters["NormalMap"].SetValue(leftFoot);
+
+                images.Add(f.prepareTexture(this));
+            }
+            
 
             GraphicsDevice.SetRenderTarget(null);
+            //GraphicsDevice.Clear(Color.Transparent);
             //FileStream file = new FileStream("SlumpParallax.png", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             //collisionMap.SaveAsPng(file, 512, 512);
             //file.Close();
@@ -343,14 +455,14 @@ namespace Parallax_Demo
                 GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(
                      PrimitiveType.TriangleList, beach.Vertices, 0, beach.Vertices.Length, beach.Indices, 0, beach.Indices.Length/3);
             }
-            Vector2 ratio = new Vector2(footprint.Length_X / beach.Length_X, -footprint.Length_Z / beach.Length_Z);
+            
             parallaxEffect.Parameters["View"].SetValue(view);
             parallaxEffect.Parameters["Projection"].SetValue(perspective);
             parallaxEffect.Parameters["DiffuseTex"].SetValue(sand);
             parallaxEffect.Parameters["LightDirection"].SetValue(lightdir.Direction);
             parallaxEffect.Parameters["CameraPosition"].SetValue(character.Position);
             parallaxEffect.Parameters["Toggle"].SetValue(toggle);
-            parallaxEffect.Parameters["Ratio"].SetValue(ratio);
+            
             parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
 
             DepthStencilState ds_save = GraphicsDevice.DepthStencilState;
@@ -365,7 +477,7 @@ namespace Parallax_Demo
             //foreach (FootDecal f in steps)
             //{
             //collision.Parameters["World"].SetValue(f.World);
-            parallaxEffect.Parameters["World"].SetValue(overlap.World);
+            //parallaxEffect.Parameters["World"].SetValue(overlap.World);
             //normalMap.SetData<Color>(f.Pixels);
 
             //foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
@@ -375,19 +487,33 @@ namespace Parallax_Demo
             //    GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
             //            PrimitiveType.TriangleList, overlap.Vertices, 0, overlap.Vertices.Length, overlap.Indices, 0, overlap.Indices.Length / 3);
             //}
-
-
-            parallaxEffect.Parameters["World"].SetValue(footprint.World);
-            //normalMap.SetData<Color>(f.Pixels);
-            //parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
-            parallaxEffect.Parameters["NormalTex"].SetValue(images[0]);
-            //parallaxEffect.Parameters["NormalTex"].SetValue((Texture2D)collisionMap);
-            foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
+            BlendState bs_save = GraphicsDevice.BlendState;
+            BlendState bs = new BlendState();
+            bs.ColorDestinationBlend = Blend.InverseSourceAlpha;
+            bs.ColorSourceBlend = Blend.SourceAlpha;
+            bs.AlphaSourceBlend = Blend.SourceAlpha;
+            bs.AlphaDestinationBlend = Blend.InverseSourceAlpha;
+            GraphicsDevice.BlendState = bs;
+            for (int i = 0; i < steps.Count; i++)
             {
-                pass.Apply();
-                GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
-                     PrimitiveType.TriangleList, footprint.Vertices, 0, footprint.Vertices.Length, footprint.Indices, 0, footprint.Indices.Length / 3);
+                Vector2 ratio = new Vector2(steps[i].Length_X / beach.Length_X, -steps[i].Length_Z / beach.Length_Z);
+                parallaxEffect.Parameters["Ratio"].SetValue(ratio);
+                parallaxEffect.Parameters["World"].SetValue(steps[i].World);
+                parallaxEffect.Parameters["Weight"].SetValue(steps[i].Weight);
+                //if(toggle == )
+                //parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
+                //else
+                parallaxEffect.Parameters["NormalTex"].SetValue(images[i]);
+                //parallaxEffect.Parameters["NormalTex"].SetValue((Texture2D)collisionMap);
+                foreach (EffectPass pass in parallaxEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    GraphicsDevice.DrawUserIndexedPrimitives<VertexTangentSpace>(
+                         PrimitiveType.TriangleList, steps[i].Vertices, 0, steps[i].Vertices.Length, steps[i].Indices, 0, steps[i].Indices.Length / 3);
+                }
+               // break;
             }
+            GraphicsDevice.BlendState = bs_save;
             //parallaxEffect.Parameters["NormalTex"].SetValue(normalMap);
             GraphicsDevice.DepthStencilState = ds_save;
 
@@ -395,20 +521,6 @@ namespace Parallax_Demo
            // draw_SandParticles(view, perspective);
             sun.Draw(Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(lightdir.Direction * new Vector3(30, -30, -30)), view, perspective);
             base.Draw(gameTime);
-
-            //foreach(ModelMesh mesh in chunk1.Meshes)
-            //{
-            //    foreach(ModelMeshPart part in mesh.MeshParts)
-            //    {
-            //        part.Effect = beachMaterial;
-            //        beachMaterial.Parameters["World"].SetValue(Matrix.CreateScale(0.2f) * Matrix.CreateRotationX(-(float)Math.PI / 2) * Matrix.CreateRotationY(-(float)Math.PI / 1.2f) * footprint.World * Matrix.CreateTranslation(new Vector3(1f, 0f, 1f)));
-            //        beachMaterial.Parameters["View"].SetValue(view);
-            //        beachMaterial.Parameters["Projection"].SetValue(perspective);
-            //        beachMaterial.Parameters["LightDirection"].SetValue(lightdir.Direction);
-            //    }
-            //    //chunk1.Draw(footprint.World * Matrix.CreateTranslation(new Vector3(1f, 0, 1f)), view, perspective);
-            //    mesh.Draw();
-            //}
            
         }
     }
