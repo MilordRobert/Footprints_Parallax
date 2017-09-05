@@ -22,7 +22,9 @@ namespace Parallax_Demo
         public override Texture2D prepareTexture(Footprint_Game game)
         {
             //return base.prepareTexture(game);
-            
+
+            Texture2D tex = footprint.prepareTexture(game);
+            game.collision.Parameters["SecondMap"].SetValue(tex);
 
             game.GraphicsDevice.SetRenderTarget(collisionMap);
             //GraphicsDevice.Clear(Color.Transparent);
@@ -44,22 +46,21 @@ namespace Parallax_Demo
             //         PrimitiveType.TriangleList, steps[0].Vertices, 0, steps[0].Vertices.Length, steps[0].ReverseIndices, 0, steps[0].Indices.Length / 3);
             //}
             //GraphicsDevice.SetRenderTarget(null);
-            game.runningEffect.Parameters["World"].SetValue(Matrix.Identity);
+            //game.runningEffect.Parameters["World"].SetValue(Matrix.Identity);
 
-            //runningEffect.Parameters["SecondMap"].SetValue(hole);
-            game.runningEffect.Parameters["Extract"].SetValue(game.extract);
-            if (RightFoot)
-                game.runningEffect.Parameters["NormalMap"].SetValue(game.normalMap);
-            else
-                game.runningEffect.Parameters["NormalMap"].SetValue(game.leftFoot);
+            ////runningEffect.Parameters["SecondMap"].SetValue(hole);
+            //game.runningEffect.Parameters["Extract"].SetValue(game.extract);
+            //if (RightFoot)
+            //    game.runningEffect.Parameters["NormalMap"].SetValue(game.normalMap);
+            //else
+            //    game.runningEffect.Parameters["NormalMap"].SetValue(game.leftFoot);
             
-            if (footprint.RightFoot)
-                game.runningEffect.Parameters["NormalMap"].SetValue(game.normalMap);
-            else
-                game.runningEffect.Parameters["NormalMap"].SetValue(game.leftFoot);
+            //if (footprint.RightFoot)
+            //    game.runningEffect.Parameters["NormalMap"].SetValue(game.normalMap);
+            //else
+            //    game.runningEffect.Parameters["NormalMap"].SetValue(game.leftFoot);
 
-
-            game.collision.Parameters["SecondMap"].SetValue(game.normalMap);
+           
 
 
             game.collision.Parameters["NormalMap"].SetValue(game.normalMap);

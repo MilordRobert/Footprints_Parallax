@@ -13,16 +13,18 @@ namespace Parallax_Demo
     {
         VertexPositionColor[] vertices;
         BasicEffect effect;
-
+        Vector3[] lightPositions = new Vector3[] { new Vector3(1.5f, 0.2f, -0.6f), new Vector3(1f, 0.5f, -0.8f), new Vector3(0.4f, 0.8f, 1.0f) };
+        KeyboardState kbs;
         float ztilt, xtilt;
         Vector3 direction;
+        int positionIndex = 0;
         public Vector3 Direction { get { return -direction; } set { direction = -value; } }
 
         private void SetVertexPositions()
         {
             float length = 0.8f, s = 0.02f;
             Matrix xform = Matrix.CreateRotationX(ztilt) * Matrix.CreateRotationY(xtilt);
-            direction = Vector3.Transform(new Vector3(0.4f, 0.6f, 1.2f), xform);
+            direction = Vector3.Transform(lightPositions[positionIndex], xform);
             vertices[0].Position = Vector3.Transform(new Vector3(0f, 0f, length), xform); vertices[0].Color = Color.Red;
             vertices[1].Position = Vector3.Transform(new Vector3(s, 0, length), xform); vertices[1].Color = Color.Red;
             vertices[2].Position = Vector3.Transform(new Vector3(0, 0, length), xform); vertices[2].Color = Color.Green;
@@ -42,12 +44,15 @@ namespace Parallax_Demo
 
         public void Update(KeyboardState kbst)
         {
+
             float speed = 0.01f;
             if (kbst.IsKeyDown(Keys.J)) xtilt -= speed;
             if (kbst.IsKeyDown(Keys.L)) xtilt += speed;
             if (kbst.IsKeyDown(Keys.I)) ztilt -= speed;
             if (kbst.IsKeyDown(Keys.K)) ztilt += speed;
+            if (kbst.IsKeyDown(Keys.Tab) && kbs.IsKeyUp(Keys.Tab)) positionIndex = (positionIndex + 1) % lightPositions.Length;
             SetVertexPositions();
+            kbs = kbst;
         }
 
         public void Draw(GraphicsDeviceManager graphics, Matrix v, Matrix p)

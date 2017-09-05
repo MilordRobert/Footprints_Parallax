@@ -66,8 +66,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR
 {
-	if(Toggle)
-	return float4(tex2D(NormalSampler, input.TexC).rgb, 1);
+	/*if(Toggle)
+	return float4(tex2D(NormalSampler, input.TexC).aaa, 1);*/
 	const float delta = 0.02;
 const float maxheight = 0;
 const float maxDepth = 2;
@@ -92,7 +92,7 @@ float2 dVInS = VIn.xy / (-VIn.z) * float2(1, -1) * Weight;
 float3 VIns2 = mul(normalize(input.WorldPosition - CameraPosition), World2Tangent1);
 float2 dVIns2 = VIns2.xy / (-VIns2.z) * float2(1, -1) * Weight;
 //return float4(VIn.xxx, 1);
-//if (tex2D(NormalSampler, input.TexC).a  -0.5 < 0.01)
+//if (tex2D(NormalSampler, input.TexC).a  == 0.5)
 //return float4(0, 0, 0, 0);
 bool above = true;
 bool indent = false;
@@ -159,7 +159,7 @@ deep /= 2.5;
 
 
 //float normal = (tex2D(DiffuseSampler, (input.WorldTexC + dVIns2 * d * Ratio)).rgb + tex2D(DiffuseSampler, (input.WorldTexC + dVIns2 * d * Ratio + erosionDirection * Time)).rgb)/2;
-//if(!Toggle)
+if(!Toggle)
 return float4(tex2D(DiffuseSampler, (input.WorldTexC + dVIns2 * d * Ratio) ).rgb * brightness - float3(darkener.xx, darkener * 0.8) - float3(deep.xx, deep * 0.8), 1);
 //return float4(brightness.xxx, 1);                              // Show lighting or
 return float4(tex2D(NormalSampler, input.TexC + dVInS * d).rgb ,1);

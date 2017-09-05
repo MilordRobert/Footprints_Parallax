@@ -338,7 +338,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float depth2 = secondTex.a/6;// -0.1;
 		float diff = depth1 - depth2;
 		//return float4(0, 0, 0, diff);
-		depth = depth1 <= 0 ? depth2 : depth2 <= 0 ? depth1 : diff > 5 ? 1 : max(depth1, depth2) + 1 * min(depth1, depth2);
+		depth = depth1 <= 0 ? depth2 : depth2 <= 0 ? depth1 : diff > 5 ? 1 : max(depth1, depth2) + 0.6 * min(depth1, depth2);
 		float3 secondNormal = mul(secondTex.rgb * 2 - 1, transform);
 		//float3 secondNormal = secondTex.rgb * 2 - 1;
 		/*float diff = secondTex.a - firstTex.a;
@@ -346,7 +346,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		bool similar = diff < cap && diff > -cap;
 		normal = similar ? secondTex.rgb + cap * firstTex.rgb : diff < 0 ? firstTex.rgb : secondTex.rgb;*/
 		//normal = depth1 <= 0.28 ? secondNormal : depth2 <= 0.28 ? firstTex.rgb * 2 - 1 : 1 * secondNormal + 0.3 * (firstTex.rgb * 2 - 1);
-		normal = depth1 <= 0.0432 ? secondNormal : depth2 <= 0.0432 ? firstTex.rgb * 2 - 1 : 0.8 * secondNormal + 0.3 * (firstTex.rgb * 2 - 1);
+		normal = depth1 <= 0.002 ? secondNormal : depth2 <= 0.002 ? firstTex.rgb * 2 - 1 : 0.8 * secondNormal + 0.3 * (firstTex.rgb * 2 - 1);
 		//if (abs(secondTex.a - firstTex.a) <= 0.1)
 		//{
 		//normal = normalize(mul(secondTex.rgb * 2 - 1, transform) + (firstTex.rgb * 2 - 1));
@@ -364,20 +364,20 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		//}
 		normal = normalize(normal);
 		normal = (normal + 1) / 2;
-		return float4(normal, depth);
+		return float4(normal, depth + 0.5);
 		//return float4(1, 0, 0, 1);
 	}
 	else if (inA)
 		//return firstTex;
-	return float4(firstTex.rgb, firstTex.a/6);
+	return float4(firstTex.rgb, firstTex.a/6 + 0.5);
 	else if (inB)
 	{
 
 		secondTex.rgb = mul(secondTex.rgb * 2 - 1, transform);
-		return float4((secondTex.rgb + 1) / 2, secondTex.a/6);
+		return float4((secondTex.rgb + 1) / 2, secondTex.a/6 + 0.5);
 	}
 
-	else return float4(0, 0, 0, 0);
+	else return float4(0.5, 0.5, 1, 0.5);
 	//return float4(1,0,0,1);
 	// TODO: add your pixel shader code here.
 

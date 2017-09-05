@@ -114,10 +114,11 @@ namespace Parallax_Demo
 
         public void set_scene()
         {
-            //FootDecal foot = new FootDecal(new Vector3(-20, 0, -35), ADULT_FOOT_SIZE, beach, 0, normalMap, this, false, adult_right, 0.15f);
+            FootDecal foot = new FootDecal(new Vector3(-20, 0, -35), ADULT_FOOT_SIZE, beach, 0, normalMap, this, false, adult_right, 0.15f);
+            foot.Age();
             ////steps.Add(foot);
-            //FootDecal f = new DecalOverlap(foot,new Vector3(-21, 0, -35f), ADULT_FOOT_SIZE, beach, (float)Math.PI / 3, normalMap, this, false, adult_right, 0.15f);
-            //steps.Add(f);
+            FootDecal f = new DecalOverlap(foot,new Vector3(-20, 0, -35f), ADULT_FOOT_SIZE, beach, (float)Math.PI / 3, normalMap, this, false, adult_right, 0.15f);
+            steps.Add(f);
             add_adult(new Vector3(-6, 0, -8.5f), 3.14f / 8f, 0.1f);
             add_adult(new Vector3(-9, 0, -10), 3.14f / 8f, 0.1f);
             add_adult(new Vector3(-8, 0, -12), 3.14f / 8f, 0.1f);
@@ -494,6 +495,7 @@ namespace Parallax_Demo
             bs.AlphaSourceBlend = Blend.SourceAlpha;
             bs.AlphaDestinationBlend = Blend.InverseSourceAlpha;
             GraphicsDevice.BlendState = bs;
+
             for (int i = 0; i < steps.Count; i++)
             {
                 Vector2 ratio = new Vector2(steps[i].Length_X / beach.Length_X, -steps[i].Length_Z / beach.Length_Z);
@@ -519,7 +521,7 @@ namespace Parallax_Demo
 
             lightdir.Draw(graphics, view, perspective);
            // draw_SandParticles(view, perspective);
-            sun.Draw(Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(lightdir.Direction * new Vector3(30, -30, -30)), view, perspective);
+            sun.Draw(Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(lightdir.Direction * new Vector3(-30, -30, -30)), view, perspective);
             base.Draw(gameTime);
            
         }

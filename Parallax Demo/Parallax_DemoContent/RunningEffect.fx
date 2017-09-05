@@ -127,12 +127,12 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 		depth = newDepth;
 		//normal = normalize(normal + float3(0, 0, 10 * timeSegment * (C - limit)));
-		nUp.xyz = normalize(nUp.xyz + float3(0, 0, 10 * timeSegment * (cUp - limit)));
-		nDown.xyz = normalize(nDown.xyz + float3(0, 0, 10 * timeSegment * (cDown - limit)));
+		nUp.xyz = normalize(nUp.xyz + float3(0, 0, timeSegment * (cUp - limit)));
+		nDown.xyz = normalize(nDown.xyz + float3(0, 0, timeSegment * (cDown - limit)));
 		//nLeft.xyz = normalize(nLeft.xyz + float3(0, 0, 10 * timeSegment * (cLeft - limit)));
 		//nRight.xyz = normalize(nRight.xyz + float3(0, 0, 10 * timeSegment *(cRight - limit)));
 
-		normal = float3(normal.x, (nUp.a - nDown.a), normal.z + 10 * timeSegment * (C - limit));
+		normal = float3(normal.x, (nUp.a - nDown.a), normal.z + timeSegment * (C - limit));
 		normal = normalize(normal);
 	}
 

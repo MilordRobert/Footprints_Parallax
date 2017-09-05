@@ -235,7 +235,7 @@ namespace Parallax_Demo
         public void Age()
         {
             //if (time < 0.25)
-                time += 0.001f;      
+                time += 0.5f;      
         }
     }
 

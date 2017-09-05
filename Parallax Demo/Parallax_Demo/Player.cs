@@ -29,10 +29,10 @@ namespace Parallax_Demo
         {
             position = new Vector3(-20, 2f, -30);
             rotation = new Vector3(0, 0, 0);
-            forward = new Vector3(0, 0, -1);
+            forward = new Vector3(0, 0, 1);
             right = new Vector3(1, 0, 0);
             up = new Vector3(0, 1, 0);
-            heading = 0;
+            heading = -0.6f;
             elevation = 0;
         }
 
@@ -69,12 +69,12 @@ namespace Parallax_Demo
             int mdx = Mouse.GetState().X - 100;
             int mdy = Mouse.GetState().Y - 100;
             heading += mdx / 1000.0f;
-            elevation -= mdy / 1000.0f;
+            elevation += mdy / 1000.0f;
             Mouse.SetPosition(100, 100);
 
             last_mouse_state = Mouse.GetState();
 
-            forward = Vector3.Transform(new Vector3(0, 0, -1),
+            forward = Vector3.Transform(new Vector3(0, 0, 1),
                          Matrix.CreateRotationY(-heading)
                         );
             right = Vector3.Cross(forward, new Vector3(0, 1, 0));
@@ -87,7 +87,7 @@ namespace Parallax_Demo
             if (Keyboard.GetState().IsKeyDown(Keys.A)) position -= movement * right;
             if (Keyboard.GetState().IsKeyDown(Keys.D)) position += movement * right;
 
-            forward = Vector3.Transform(new Vector3(0, 0, -1),
+            forward = Vector3.Transform(new Vector3(0, 0, 1),
                         Matrix.CreateRotationX(elevation) * Matrix.CreateRotationY(-heading)
                         );
             rotation = new Vector3(0, -heading, 0);
